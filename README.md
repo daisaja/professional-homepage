@@ -1,43 +1,147 @@
-# Astro Starter Kit: Minimal
+# Professional Homepage - Lars Gentsch
 
-```sh
-npm create astro@latest -- --template minimal
+Professionelle Homepage für Lars Gentsch, gehostet unter [lars-gentsch.de](https://lars-gentsch.de).
+
+## Technologien
+
+- **Astro** - Modernes Web-Framework für statische Seiten
+- **Tailwind CSS v4** - Utility-first CSS Framework
+- **TypeScript** - Type-safe development
+
+## Entwicklung
+
+### Voraussetzungen
+
+- Node.js 18 oder höher
+- npm
+
+### Installation
+
+```bash
+npm install
 ```
 
-> 🧑‍🚀 **Seasoned astronaut?** Delete this file. Have fun!
+### Development Server starten
 
-## 🚀 Project Structure
+```bash
+npm run dev
+```
 
-Inside of your Astro project, you'll see the following folders and files:
+Der Development Server läuft unter `http://localhost:4321`
 
-```text
+### Build für Production
+
+```bash
+npm run build
+```
+
+Die statischen Dateien werden im `dist/` Verzeichnis generiert.
+
+### Preview der Production Build
+
+```bash
+npm run preview
+```
+
+## Deployment auf Strato
+
+### Schritt 1: Production Build erstellen
+
+```bash
+npm run build
+```
+
+Dies erstellt alle statischen Dateien im `dist/` Verzeichnis.
+
+### Schritt 2: Dateien hochladen
+
+1. Verbinden Sie sich via FTP/SFTP mit Ihrem Strato-Server:
+   - Host: Ihre Strato FTP-Adresse (z.B. `ftp.strato.de` oder `ssh.strato.de`)
+   - Benutzername: Ihr Strato FTP-Benutzername
+   - Passwort: Ihr Strato FTP-Passwort
+
+2. Navigieren Sie zum Web-Root-Verzeichnis (üblicherweise `/` oder `/html` oder `/public_html`)
+
+3. Laden Sie **alle Dateien und Ordner** aus dem `dist/` Verzeichnis hoch
+
+### Schritt 3: Domain konfigurieren
+
+1. Loggen Sie sich in Ihr Strato-Kundencenter ein
+2. Navigieren Sie zu "Domains & SSL"
+3. Stellen Sie sicher, dass `lars-gentsch.de` auf das richtige Verzeichnis zeigt
+
+### Alternative: GitHub Actions für automatisches Deployment
+
+Sie können auch GitHub Actions für automatisches Deployment einrichten:
+
+1. FTP-Zugangsdaten als GitHub Secrets hinzufügen:
+   - `FTP_HOST`
+   - `FTP_USERNAME`
+   - `FTP_PASSWORD`
+
+2. Workflow-Datei erstellen (`.github/workflows/deploy.yml`):
+
+```yaml
+name: Deploy to Strato
+
+on:
+  push:
+    branches: [ main ]
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build
+        run: npm run build
+
+      - name: Deploy via FTP
+        uses: SamKirkland/FTP-Deploy-Action@v4.3.4
+        with:
+          server: ${{ secrets.FTP_HOST }}
+          username: ${{ secrets.FTP_USERNAME }}
+          password: ${{ secrets.FTP_PASSWORD }}
+          local-dir: ./dist/
+```
+
+## Projektstruktur
+
+```
 /
-├── public/
+├── public/             # Statische Assets (favicon, etc.)
 ├── src/
-│   └── pages/
-│       └── index.astro
-└── package.json
+│   ├── pages/         # Seiten (index.astro)
+│   └── styles/        # CSS-Dateien
+├── astro.config.mjs   # Astro-Konfiguration
+└── package.json       # Projekt-Dependencies
 ```
 
-Astro looks for `.astro` or `.md` files in the `src/pages/` directory. Each page is exposed as a route based on its file name.
+## Inhalt aktualisieren
 
-There's nothing special about `src/components/`, but that's where we like to put any Astro/React/Vue/Svelte/Preact components.
+Die Hauptseite befindet sich in `src/pages/index.astro`. Hier können Sie folgende Sektionen anpassen:
 
-Any static assets, like images, can be placed in the `public/` directory.
+- **Hero Section** - Name und Titel
+- **About Section** - Beruflicher Hintergrund
+- **Expertise Section** - Fachgebiete
+- **Reading List** - Lieblingsbücher
+- **Contact Section** - Kontaktlinks
 
-## 🧞 Commands
+## Links
 
-All commands are run from the root of the project, from a terminal:
+- GitHub Repository: [https://github.com/daisaja/professional-homepage](https://github.com/daisaja/professional-homepage)
+- LinkedIn: [https://de.linkedin.com/in/lars-gentsch-0854a48b](https://de.linkedin.com/in/lars-gentsch-0854a48b)
+- Goodreads: [https://www.goodreads.com/user/show/65778884-lars-gentsch](https://www.goodreads.com/user/show/65778884-lars-gentsch)
 
-| Command                   | Action                                           |
-| :------------------------ | :----------------------------------------------- |
-| `npm install`             | Installs dependencies                            |
-| `npm run dev`             | Starts local dev server at `localhost:4321`      |
-| `npm run build`           | Build your production site to `./dist/`          |
-| `npm run preview`         | Preview your build locally, before deploying     |
-| `npm run astro ...`       | Run CLI commands like `astro add`, `astro check` |
-| `npm run astro -- --help` | Get help using the Astro CLI                     |
+## Lizenz
 
-## 👀 Want to learn more?
-
-Feel free to check [our documentation](https://docs.astro.build) or jump into our [Discord server](https://astro.build/chat).
+© 2025 Lars Gentsch. Alle Rechte vorbehalten.
