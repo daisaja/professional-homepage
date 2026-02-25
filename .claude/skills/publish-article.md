@@ -1,3 +1,8 @@
+---
+name: publish-article
+description: Vollautomatische Artikel-Pipeline — liest ein Google-Doc, schreibt einen zweisprachigen (DE/EN) Artikel in Lars's Stil, generiert Bilder via Imagen, und published auf lars-gentsch.de. Aufruf mit `/publish-article "Google Doc Name"`.
+---
+
 # publish-article
 
 Vollautomatische Artikel-Pipeline: liest ein Google-Doc, schreibt einen zweisprachigen (DE/EN) Artikel in Lars's Stil, generiert Bilder via Imagen, und published auf lars-gentsch.de.
