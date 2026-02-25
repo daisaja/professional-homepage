@@ -24,13 +24,9 @@ jobs:
       - name: Build
         run: npm run build
 
-      - name: Deploy via SFTP
-        uses: SamKirkland/FTP-Deploy-Action@v4.3.5
-        with:
-          protocol: sftp
-          server: ${{ secrets.FTP_HOST }}
-          username: ${{ secrets.FTP_USERNAME }}
-          password: ${{ secrets.FTP_PASSWORD }}
-          local-dir: ./dist/
-          server-dir: /beruflich/
-          dangerous-clean-slate: false
+      - name: Deploy via rsync over SSH
+        run: |
+          sudo apt-get install -y sshpass rsync
+          sshpass -p "${{ secrets.FTP_PASSWORD }}" rsync -avz --delete \
+            -e "ssh -o StrictHostKeyChecking=no" \
+            dist/ ${{ secrets.FTP_USERNAME }}@${{ secrets.FTP_HOST }}:/beruflich/
