@@ -289,4 +289,4 @@ Viel Erfolg. Ihr werdet sie brauchen.
 
 ---
 
-*Läuft bei mir: Synology DS923+, Docker via Container Manager, OpenClaw `alpine/openclaw:latest`.*
+*Läuft bei mir: Synology DS423+, Docker via Container Manager, OpenClaw `alpine/openclaw:latest`.*

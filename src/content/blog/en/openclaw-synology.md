@@ -289,4 +289,4 @@ Good luck. You'll need it.
 
 ---
 
-*Running on: Synology DS923+, Docker via Container Manager, OpenClaw `alpine/openclaw:latest`.*
+*Running on: Synology DS423+, Docker via Container Manager, OpenClaw `alpine/openclaw:latest`.*
