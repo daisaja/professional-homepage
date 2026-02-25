@@ -245,7 +245,7 @@ git push
 
 GitHub Actions deployt automatisch auf lars-gentsch.de.
 
-## Schritt 11: LinkedIn-Post erstellen (LinkedIn-Texter Subagent)
+## Schritt 11: LinkedIn-Post erstellen
 
 **11a. Titelbild auswählen:**
 
