@@ -1,0 +1,36 @@
+name: Publish to LinkedIn
+
+on:
+  workflow_dispatch:
+    inputs:
+      slug:
+        description: 'Article slug (e.g. my-article-title)'
+        required: true
+        type: string
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Publish to LinkedIn
+        env:
+          LINKEDIN_ACCESS_TOKEN: ${{ secrets.LINKEDIN_ACCESS_TOKEN }}
+          LINKEDIN_PERSON_URN: ${{ secrets.LINKEDIN_PERSON_URN }}
+        run: node scripts/linkedin-post.js linkedin-posts/${{ inputs.slug }}.md
+
+      - name: Commit published status
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email 'github-actions[bot]@users.noreply.github.com'
+          git add linkedin-posts/${{ inputs.slug }}.md
+          git diff --staged --quiet || git commit -m "chore: mark linkedin post as published (${{ inputs.slug }})"
+          git push

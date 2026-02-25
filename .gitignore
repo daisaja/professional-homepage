@@ -26,3 +26,7 @@ pnpm-debug.log*
 # Google OAuth credentials and token cache
 scripts/token.json
 scripts/credentials.json
+
+# LinkedIn OAuth credentials and token cache
+scripts/linkedin-credentials.json
+scripts/linkedin-token.json

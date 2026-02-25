@@ -238,29 +238,37 @@ Bei sprachspezifischen Bildern: DE-Artikel bekommt `-de.png`, EN-Artikel bekommt
 ## Schritt 10: Commit und Deploy
 
 ```bash
-git add src/content/blog/ public/blog/
+git add src/content/blog/ public/blog/ linkedin-posts/
 git commit -m "feat: publish article '$SLUG'"
 git push
 ```
 
 GitHub Actions deployt automatisch auf lars-gentsch.de.
 
-## Schritt 11: LinkedIn-Posts erstellen (LinkedIn-Texter Subagenten)
+## Schritt 11: LinkedIn-Post erstellen (LinkedIn-Texter Subagent)
 
-Dispatche **beide Posts parallel** (unabhängig voneinander):
+**11a. Titelbild auswählen:**
 
-**Task für DE-Post:**
+Prüfe folgende Pfade in dieser Reihenfolge und nimm den ersten, der existiert:
+1. `public/blog/$SLUG/image-1-en.png`
+2. `public/blog/$SLUG/image-1.png`
 
-> "Schreibe einen LinkedIn-Post auf Deutsch für Lars Gentsch.
+Speichere den gefundenen Pfad als `LINKEDIN_IMAGE` (oder leer wenn keiner existiert).
+
+**11b. EN-Post generieren:**
+
+Dispatche einen **LinkedIn-Texter-Subagenten** mit diesem Task:
+
+> "Schreibe einen LinkedIn-Post auf Englisch für Lars Gentsch.
 >
 > **Artikel:**
-> [DE_FINAL EINFÜGEN]
+> [EN_FINAL EINFÜGEN]
 >
-> **Link:** https://lars-gentsch.de/de/blog/$SLUG
+> **Link:** https://lars-gentsch.de/en/blog/$SLUG
 >
 > **Format:**
 > - Erster Satz: starker Hook — neugierig machend, keine Clickbait-Plattitüden
-> - 3-4 kurze Sätze Kernaussage (kein Bullet-Listen — LinkedIn rendert sie schlecht)
+> - 3-4 kurze Sätze Kernaussage (keine Bullet-Listen — LinkedIn rendert sie schlecht)
 > - Abschluss: persönliche Einladung zum Lesen + Link
 > - 3-5 relevante Hashtags am Ende
 > - Ton: selbstironisch, direkt, wie Lars schreibt — nicht corporate
@@ -268,9 +276,26 @@ Dispatche **beide Posts parallel** (unabhängig voneinander):
 >
 > Gib NUR den Post-Text aus, nichts anderes."
 
-**Task für EN-Post:** identisch, aber auf Englisch mit EN_FINAL und Link `https://lars-gentsch.de/en/blog/$SLUG`.
+Speichere das Ergebnis als `EN_POST`.
 
-Speichere die Ergebnisse als `DE_POST` und `EN_POST`.
+**11c. LinkedIn-Post-Datei erstellen:**
+
+Erstelle `linkedin-posts/$SLUG.md` mit folgendem Inhalt:
+
+```markdown
+---
+slug: $SLUG
+image: $LINKEDIN_IMAGE
+en_url: https://lars-gentsch.de/en/blog/$SLUG
+published: false
+published_at: ~
+linkedin_post_id: ~
+---
+
+$EN_POST
+```
+
+(Falls kein Bild gefunden: `image: ~`)
 
 **Ausgabe nach Abschluss:**
 ```
@@ -278,9 +303,6 @@ Speichere die Ergebnisse als `DE_POST` und `EN_POST`.
 DE: https://lars-gentsch.de/de/blog/$SLUG
 EN: https://lars-gentsch.de/en/blog/$SLUG
 
---- LinkedIn DE ---
-[DE_POST]
-
---- LinkedIn EN ---
-[EN_POST]
+LinkedIn-Post bereit: linkedin-posts/$SLUG.md
+Zum Veröffentlichen: GitHub Actions → "Publish to LinkedIn" → slug: $SLUG
 ```
