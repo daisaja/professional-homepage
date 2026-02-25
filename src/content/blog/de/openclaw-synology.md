@@ -10,15 +10,17 @@ pubDate: 2026-02-25
 
 Es sollte einfach sein. Es ist nie einfach.
 
-Ich betreibe seit Jahren eine Synology DiskStation. Ich weiß, wie Docker funktioniert. Ich habe einen API-Key. Also dachte ich: Wie schwer kann es sein, [OpenClaw](https://github.com/openclaw/openclaw) — ein selbst-gehostetes AI-Gateway — auf meinem NAS zu betreiben?
+Ich betreibe seit Jahren eine Synology DiskStation. Ich weiß, wie Docker funktioniert. Ich habe einen API-Key. Also dachte ich: Wie schwer kann es sein, OpenClaw — ein selbst-gehostetes AI-Gateway — auf meinem NAS zu betreiben?
 
 Spoiler: Acht Stunden. Acht Hürden. Eine finale Konfiguration, die ich euch nicht vorenthalten werde.
+
+![Ein NAS-Server im Zentrum, umgeben von acht gesperrten Toren als Gauntlet, das letzte Tor mit goldenem Licht geöffnet](/blog/openclaw-synology/image-2.png)
 
 ---
 
 ## Was ist OpenClaw überhaupt?
 
-OpenClaw ist ein Self-Hosted AI-Gateway: ein zentraler Endpunkt, über den ihr alle eure AI-Anfragen laufen lassen könnt — egal ob Claude, GPT, oder ein Dutzend andere Provider. Mit Control UI, Telegram-Integration, Agent-Verwaltung. Das Ding ist mächtig. Aber es hat seinen Preis: Es geht davon aus, dass ihr wisst, was ihr tut.
+OpenClaw ist ein Self-Hosted AI-Gateway: ein zentraler Endpunkt, über den ihr alle eure AI-Anfragen laufen lassen könnt — egal ob Claude, GPT, oder ein Dutzend andere Provider. Mit Control UI, Telegram-Integration, Agent-Verwaltung. Ich war beeindruckt. Ich war auch noch nicht fertig mit Beeindruckt-Sein, als der erste Fehler kam.
 
 Ich dachte, ich weiß, was ich tue.
 
@@ -26,7 +28,7 @@ Ich dachte, ich weiß, was ich tue.
 
 ## Hürde 1: EACCES — Willkommen in der Welt der Docker-Berechtigungen
 
-Das Docker Image `alpine/openclaw:latest` läuft standardmäßig als `node`-User. Synology hat da seine eigene Meinung zu Dateisystem-Berechtigungen. Das Ergebnis: ein knallroter `EACCES`-Fehler beim Start.
+Das Docker Image `alpine/openclaw:latest` läuft standardmäßig als `node`-User. Synology hat da seine eigene Meinung zu Dateisystem-Berechtigungen. Das Ergebnis: ein knallroter `EACCES`-Fehler beim Start. Keine Fehlermeldung, die irgendwo hinführt. Nur eine Tür, die nicht aufgeht.
 
 Die Lösung ist eigentlich trivial, wenn man sie kennt:
 
@@ -58,7 +60,7 @@ Klar. Natürlich. Offensichtlich. Im Nachhinein.
 
 ## Hürde 3: Der Gateway, der nur mit sich selbst reden wollte
 
-OpenClaw bindet sich auf `127.0.0.1:18789`. Loopback. Von außen nicht erreichbar. Das ist aus Sicherheitsgründen vermutlich vernünftig, aber auf einem NAS, das als Server im Heimnetz hängt, ist das ein kleines Problem.
+OpenClaw bindet sich auf `127.0.0.1:18789`. Loopback. Von außen nicht erreichbar. Das ist aus Sicherheitsgründen vermutlich vernünftig — aber auf einem NAS, das als Server im Heimnetz hängt, ist das ein kleines Problem. Ich bin von außen. Ich will rein.
 
 Die Lösung: `network_mode: host`, damit der Container das Netzwerk des Hosts teilt. Und dann ein nginx Reverse Proxy als zweiter Container, der HTTPS terminiert und auf Port 18790 nach außen erreichbar ist.
 
@@ -79,7 +81,7 @@ Browser-Warnung wegen self-signed cert? Ignorieren. Wir sind Profis.
 
 ## Hürde 4: CORS — Der stille Killer
 
-nginx leitet weiter. Der Browser ruft die Control UI auf. Und dann... nichts. Der WebSocket-Request scheitert lautlos an CORS.
+nginx leitet weiter. Der Browser ruft die Control UI auf. Und dann... nichts. Der WebSocket-Request scheitert lautlos. Kein 404, kein 500. Einfach: nichts. CORS.
 
 ```json
 "gateway": {
@@ -103,15 +105,15 @@ Die Control UI lädt. Schön. Der WebSocket verbindet sich. Auch schön. Und dan
 1008: device token mismatch
 ```
 
-Okay. Browser-Cache leeren? Nein. Config-Verzeichnis leeren und neu starten? Nein. Browser LocalStorage löschen? Nein. IndexedDB leeren? Nein.
+Okay. Tief durchatmen. Browser-Cache leeren? Nein. Config-Verzeichnis leeren und neu starten? Nein. Browser LocalStorage löschen? Nein. IndexedDB leeren? Nein. Einen Moment lang ernsthaft erwogen, das NAS aus dem Fenster zu werfen? Ja.
 
-Ich habe alles geleert, was sich leeren ließ. Der Fehler blieb.
+Ich habe alles geleert, was sich leeren ließ. Der Fehler blieb. Der Fehler blieb bei jedem Versuch, mit derselben Gleichgültigkeit, mit der Maschinen eben gleichgültig sind. Keine neue Fehlermeldung. Keine Spur. Nur `1008`.
 
 ### Die Detektivarbeit beginnt
 
 Nach der fünften Stunde entschied ich, dass raten nicht mehr reicht. Ich brauchte SSH.
 
-Auf der Synology: *Systemsteuerung → Terminal & SNMP → SSH aktivieren*. Klingt einfach. Ist es auch. Warum habe ich das nicht früher gemacht?
+Auf der Synology: *Systemsteuerung → Terminal & SNMP → SSH aktivieren*. Klingt einfach. Ist es auch. Warum habe ich das nicht früher gemacht? Keine Antwort, die ich laut aussprechen möchte.
 
 ```bash
 ssh super_ad@192.168.178.34
@@ -131,13 +133,13 @@ Ich schaue mir `auth.json` an. Inhalt: `{}`. Leer. Völlig leer. Das ist verdäc
 
 ### Source-Code-Analyse: Der Kaninchenbau wird tiefer
 
-Ich clone das OpenClaw-Repository und lese den Code. Und da ist es, begraben in der Auth-Logik:
+Ich clone das OpenClaw-Repository und lese den Code. Nicht weil ich Spaß daran habe. Weil mir nichts anderes übrig bleibt.
 
-Device-Tokens werden nicht in `auth.json` gespeichert. Sie sind in `device-auth.json`. Eine Datei, die ich nie angelegt hatte — weil das Device-Pairing nie stattgefunden hatte.
+Und da ist es, begraben in der Auth-Logik: Device-Tokens werden nicht in `auth.json` gespeichert. Sie sind in `device-auth.json`. Eine Datei, die ich nie angelegt hatte — weil das Device-Pairing nie stattgefunden hatte. Natürlich.
 
 Und dann die zweite Erkenntnis, die alles erklärt: Das Gateway hatte **beide** Environment-Variablen gesetzt — `OPENCLAW_GATEWAY_TOKEN` *und* `OPENCLAW_GATEWAY_PASSWORD`. Bei Konflikt: automatischer Password-Modus. Der `#token=` in meiner URL wurde stillschweigend ignoriert.
 
-Ich hatte die ganze Zeit das falsche Auth-System angesprochen.
+Ich hatte fünf Stunden lang das falsche Auth-System angesprochen. Das System hat mich nicht einmal darauf hingewiesen. Es hat einfach geschwiegen und `1008` zurückgegeben, wieder und wieder, mit der Freundlichkeit eines Türstehers, der nicht mal erklärt, warum man nicht reinkommt.
 
 ### Die Lösung — zwei Zeilen JSON
 
@@ -155,19 +157,17 @@ Ich hatte die ganze Zeit das falsche Auth-System angesprochen.
 `auth.mode: "token"` — erzwingt Token-Modus, kein Password-Fallback mehr.
 `dangerouslyDisableDeviceAuth: true` — überspringt das Device-Pairing für Remote-Zugriff.
 
-Container neugestartet. Browser geöffnet. WebSocket verbunden.
+Container neugestartet. Browser geöffnet. Kein `1008`. Ich hab kurz geschaut, ob der Bildschirm mich verarscht. Er hat nicht.
 
-Kein `1008`. Kein Fehler. Die Control UI leuchtet auf.
+Zwei Zeilen JSON. Fünf Stunden meines Lebens. Irgendwo muss das fair sein.
 
-Ich saß da und starrte auf den Bildschirm. Fünf Stunden. Zwei Zeilen JSON.
-
-Das ist Self-Hosted AI.
+![Ein mittelalterlicher Ritter hält ein leuchtendes Ethernet-Kabel wie ein Schwert, steht vor einer Burg aus NAS-Geräten und Docker-Containern, mit besiegten Fehler-Schriftrollen am Boden](/blog/openclaw-synology/image-3.png)
 
 ---
 
 ## Hürde 6: Telegram — Timing ist alles
 
-Telegram-Bot eingerichtet, Pairing-Code angefordert. Der Code läuft nach fünf Minuten ab. Ich war nach sechs Minuten fertig mit der Config.
+Telegram-Bot eingerichtet, Pairing-Code angefordert. Der Code läuft nach fünf Minuten ab. Ich war nach sechs Minuten fertig mit der Config. Natürlich.
 
 ```bash
 node /app/openclaw.mjs pairing approve telegram MEIN_CODE
@@ -179,7 +179,7 @@ Wer SSH hat, braucht keine Angst vor abgelaufenen Codes.
 
 ## Hürde 7: Kein Provider, keine Party
 
-Erster Agent-Test. Fehler: kein AI-Provider konfiguriert. Standard ist Anthropic — und ich hatte keinen Anthropic-Key in der Config. Aber ich hatte OpenAI.
+Erster Agent-Test. Fehler: kein AI-Provider konfiguriert. Standard ist Anthropic — und ich hatte keinen Anthropic-Key in der Config. Aber ich hatte OpenAI. Das reicht.
 
 ```json
 {
@@ -199,7 +199,7 @@ Funktioniert. Gut. Aber ich wollte mehr.
 
 Der `openai-codex` Provider unterstützt kein API-Key-Auth. Er will OAuth. Der OAuth-Callback läuft auf Port 1455 — lokal auf dem Rechner, der `openclaw.mjs` ausführt. Auf dem NAS.
 
-Das Problem: Mein Browser läuft auf meinem Laptop. Der Callback-Port ist auf dem NAS. Die URL, die der OAuth-Flow erzeugt, zeigt auf `localhost:1455` — also auf den NAS, nicht auf meinen Laptop.
+Das Problem: Mein Browser läuft auf meinem Laptop. Der Callback-Port ist auf dem NAS. Die URL, die der OAuth-Flow erzeugt, zeigt auf `localhost:1455` — also auf den NAS, nicht auf meinen Laptop. Ich sitze dazwischen und schaue zu.
 
 Lösung: SSH-Tunnel.
 
@@ -224,7 +224,7 @@ GPT-5.3-Codex läuft. Auf meinem NAS. Via Self-Hosted Gateway.
 
 ## Die finale Konfiguration
 
-Falls ihr das replizieren wollt — hier ist alles, was ihr braucht:
+Falls ihr das replizieren wollt — hier ist alles, was ihr braucht.
 
 **docker-compose.yml:**
 ```yaml
@@ -248,7 +248,7 @@ services:
       - /volume1/docker/openclaw/ssl:/etc/nginx/ssl:ro
 ```
 
-**Wichtig:** Nicht gleichzeitig `OPENCLAW_GATEWAY_TOKEN` und `OPENCLAW_GATEWAY_PASSWORD` setzen — das löst den Password-Modus aus.
+**Wichtig:** Nicht gleichzeitig `OPENCLAW_GATEWAY_TOKEN` und `OPENCLAW_GATEWAY_PASSWORD` setzen — das löst den Password-Modus aus. Dieser Hinweis hätte mir fünf Stunden gespart. Er steht jetzt hier, damit er euch nicht fünf Stunden kostet.
 
 **openclaw.json:**
 ```json
@@ -283,9 +283,11 @@ Und dann sitzt man da, es ist Mitternacht, und die Control UI lädt. GPT-5.3-Cod
 
 Das Gefühl ist unbezahlbar.
 
-Also: Macht es. Aktiviert SSH von Anfang an. Lest den Source-Code, wenn alles andere versagt. Und vergesst nie: Wenn der Fehler `1008: device token mismatch` heißt, sind es meistens zwei Zeilen JSON.
+![Entwickler an seinem Schreibtisch nach dem langen Kampf, mit einem schlafenden Drachen auf dem Server-Stack dahinter](/blog/openclaw-synology/image-1.png)
 
-Viel Erfolg. Ihr werdet sie brauchen.
+Also: Macht es. Aktiviert SSH von Anfang an — nicht wenn der Schmerz groß genug ist, sondern gleich am Anfang. Lest den Source-Code, wenn alles andere versagt. Und vergesst nie: Wenn der Fehler `1008: device token mismatch` heißt, sind es meistens zwei Zeilen JSON.
+
+Ihr werdet SSH brauchen. Aktiviert es jetzt.
 
 ---
 
