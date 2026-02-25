@@ -22,3 +22,7 @@ pnpm-debug.log*
 
 # jetbrains setting folder
 .idea/
+
+# Google OAuth credentials and token cache
+scripts/token.json
+scripts/credentials.json
