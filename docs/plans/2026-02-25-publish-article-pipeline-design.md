@@ -42,6 +42,16 @@ Ein Claude Code Skill `/publish-article "Google Doc Name"` der vollautomatisch:
         Falls Text im Bild: DE-Version + EN-Version separat generieren
         ↓
 [Publisher] Dateien speichern → git commit + push → Auto-Deploy
+        ↓
+[LinkedIn Texter] EN-Artikel → Post-Text → linkedin-posts/$SLUG.md → git commit + push
+
+        — später, manuell —
+
+GitHub Action "Publish to LinkedIn"
+        → linkedin-posts/$SLUG.md lesen
+        → Bild hochladen (LinkedIn Asset API)
+        → Post erstellen (LinkedIn UGC API)
+        → published: true zurückschreiben → git commit + push
 ```
 
 ---
@@ -208,6 +218,59 @@ git push   # → GitHub Actions → Auto-Deploy lars-gentsch.de
 
 ---
 
+## Abschnitt 6: LinkedIn-Post Pipeline
+
+### Konzept
+
+Der LinkedIn-Post wird automatisch als Teil der Artikel-Pipeline erzeugt und ins Repo gepusht. Das eigentliche Veröffentlichen auf LinkedIn läuft **manuell via GitHub Action** — so gibt es keine versehentlichen Posts.
+
+### Lokaler Schritt (Teil der Pipeline)
+
+**LinkedIn-Texter Subagent:**
+- Input: EN-Artikel + Artikel-URL
+- Output: Fertiger Post-Text (Plain-Text, max. 1300 Zeichen)
+- Format: Hook → Kernaussage (keine Bullet-Listen) → Link → Hashtags
+- Ton: selbstironisch, direkt — nicht corporate
+
+**Titelbild-Auswahl (automatisch):**
+1. Prefer `public/blog/$SLUG/image-1-en.png` (sprachspezifisch)
+2. Fallback: `public/blog/$SLUG/image-1.png`
+
+**Dateiformat `linkedin-posts/$SLUG.md`:**
+```markdown
+---
+slug: my-article-slug
+image: public/blog/my-article-slug/image-1-en.png
+en_url: https://lars-gentsch.de/en/blog/my-article-slug
+published: false
+published_at: ~
+linkedin_post_id: ~
+---
+
+Post-Text hier...
+
+#Hashtag1 #Hashtag2
+```
+
+### GitHub Action (manuell)
+
+**Trigger:** `workflow_dispatch` mit Input `slug`
+
+**Schritte:**
+1. `linkedin-posts/$SLUG.md` lesen + Frontmatter parsen
+2. Bild hochladen → LinkedIn Asset API → Asset URN
+3. UGC Post erstellen → LinkedIn API
+4. Frontmatter aktualisieren: `published: true`, `published_at`, `linkedin_post_id`
+5. Geänderte Datei committen + pushen
+
+**Skripte:**
+- `scripts/linkedin-auth.js` — einmaliger OAuth-Flow, gibt Credentials für GitHub Secrets aus
+- `scripts/linkedin-post.js` — Posting-Logik, von der Action aufgerufen
+
+**Setup:** Siehe `docs/linkedin-api-setup.md`
+
+---
+
 ## Skill-Datei
 
 **Pfad:** `.claude/skills/publish-article.md`
@@ -215,10 +278,12 @@ git push   # → GitHub Actions → Auto-Deploy lars-gentsch.de
 **Aufruf:** `/publish-article "Dokumentname in Google Drive"`
 
 **Abhängigkeiten:**
-| Variable | Zweck |
-|----------|-------|
-| `GOOGLE_API_KEY` | Google Docs/Drive API |
-| `GEMINI_API_KEY` | Imagen Bildgenerierung |
+| Variable | Zweck | Wo |
+|----------|-------|----|
+| `GOOGLE_API_KEY` | Google Docs/Drive API | lokal |
+| `GEMINI_API_KEY` | Imagen Bildgenerierung | lokal |
+| `LINKEDIN_ACCESS_TOKEN` | LinkedIn API (Posting) | GitHub Secret |
+| `LINKEDIN_PERSON_URN` | LinkedIn Profil-ID | GitHub Secret |
 
 ---
 
@@ -227,5 +292,6 @@ git push   # → GitHub Actions → Auto-Deploy lars-gentsch.de
 - Automatische Erkennung neuer Docs (kein Polling/Webhook)
 - Mehrsprachigkeit über DE/EN hinaus
 - Video- oder Audio-Content
-- Kommentarfunktion / Social Sharing
+- Kommentarfunktion
 - SEO-Optimierung (Meta-Tags, sitemap) — separates Thema
+- Weitere Social-Media-Plattformen (nur LinkedIn)
