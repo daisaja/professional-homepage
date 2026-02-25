@@ -4,10 +4,6 @@ description: "Ein einziger Befehl verwandelt ein Google Doc in einen fertigen Bl
 pubDate: 2026-02-25
 ---
 
-*Ein einziger Befehl verwandelt ein Google Doc in einen fertigen Blog-Artikel mit Bildern, englischer Übersetzung und LinkedIn-Post. Inklusive dem meta-witzigen Teil.*
-
----
-
 Copy. Paste. Frontmatter tippen. Bild generieren. Bild einbinden. Commit. Push. Wiederholen.
 
 Ich bin Entwickler. Ich automatisiere langweilige Dinge. Irgendwann habe ich gemerkt: das hier ist langweilig.

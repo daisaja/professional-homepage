@@ -4,10 +4,6 @@ description: "One command turns a Google Doc into a finished blog post with imag
 pubDate: 2026-02-25
 ---
 
-*One command turns a Google Doc into a finished blog post with images, an English translation, and a LinkedIn draft. Including the meta-funny part.*
-
----
-
 Copy. Paste. Type frontmatter. Generate image. Embed image. Commit. Push. Repeat.
 
 I'm a developer. I automate boring things. At some point I realized: this is boring.
