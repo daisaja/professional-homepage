@@ -245,9 +245,42 @@ git push
 
 GitHub Actions deployt automatisch auf lars-gentsch.de.
 
+## Schritt 11: LinkedIn-Posts erstellen (LinkedIn-Texter Subagenten)
+
+Dispatche **beide Posts parallel** (unabhängig voneinander):
+
+**Task für DE-Post:**
+
+> "Schreibe einen LinkedIn-Post auf Deutsch für Lars Gentsch.
+>
+> **Artikel:**
+> [DE_FINAL EINFÜGEN]
+>
+> **Link:** https://lars-gentsch.de/de/blog/$SLUG
+>
+> **Format:**
+> - Erster Satz: starker Hook — neugierig machend, keine Clickbait-Plattitüden
+> - 3-4 kurze Sätze Kernaussage (kein Bullet-Listen — LinkedIn rendert sie schlecht)
+> - Abschluss: persönliche Einladung zum Lesen + Link
+> - 3-5 relevante Hashtags am Ende
+> - Ton: selbstironisch, direkt, wie Lars schreibt — nicht corporate
+> - Länge: max. 1300 Zeichen (LinkedIn-Limit für Preview)
+>
+> Gib NUR den Post-Text aus, nichts anderes."
+
+**Task für EN-Post:** identisch, aber auf Englisch mit EN_FINAL und Link `https://lars-gentsch.de/en/blog/$SLUG`.
+
+Speichere die Ergebnisse als `DE_POST` und `EN_POST`.
+
 **Ausgabe nach Abschluss:**
 ```
 ✅ Artikel veröffentlicht!
 DE: https://lars-gentsch.de/de/blog/$SLUG
 EN: https://lars-gentsch.de/en/blog/$SLUG
+
+--- LinkedIn DE ---
+[DE_POST]
+
+--- LinkedIn EN ---
+[EN_POST]
 ```
