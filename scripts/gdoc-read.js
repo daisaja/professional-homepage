@@ -30,7 +30,7 @@ function extractText(doc) {
 async function getAuthClient() {
   const creds = JSON.parse(readFileSync(CREDENTIALS_PATH, 'utf8'));
   const { client_secret, client_id, redirect_uris } = creds.installed;
-  const oAuth2Client = new google.auth.OAuth2(client_id, client_secret, redirect_uris[0]);
+  const oAuth2Client = new google.auth.OAuth2(client_id, client_secret, 'http://localhost:3000');
 
   if (existsSync(TOKEN_PATH)) {
     oAuth2Client.setCredentials(JSON.parse(readFileSync(TOKEN_PATH, 'utf8')));

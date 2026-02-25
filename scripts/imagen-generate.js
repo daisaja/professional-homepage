@@ -6,7 +6,7 @@ import { writeFileSync, mkdirSync } from 'fs';
 import path from 'path';
 
 const API_KEY = process.env.GEMINI_API_KEY;
-const IMAGEN_URL = `https://generativelanguage.googleapis.com/v1beta/models/imagen-3.0-generate-001:predict?key=${API_KEY}`;
+const IMAGEN_URL = `https://generativelanguage.googleapis.com/v1beta/models/imagen-4.0-generate-001:predict?key=${API_KEY}`;
 
 async function generateImage(prompt, outputPath) {
   const response = await fetch(IMAGEN_URL, {
