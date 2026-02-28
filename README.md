@@ -12,7 +12,7 @@ Professionelle Homepage für Lars Gentsch, gehostet unter [lars-gentsch.de](http
 
 ### Voraussetzungen
 
-- Node.js 18 oder höher
+- Node.js 20 oder höher
 - npm
 
 ### Installation
@@ -43,98 +43,46 @@ Die statischen Dateien werden im `dist/` Verzeichnis generiert.
 npm run preview
 ```
 
-## Deployment auf Strato
+## Deployment
 
-### Schritt 1: Production Build erstellen
+Deployment läuft automatisch via GitHub Actions bei jedem Push auf `main`:
 
-```bash
-npm run build
-```
+1. Node.js 20 wird aufgesetzt
+2. `npm ci` + `npm run build`
+3. `dist/` wird per **rsync über SSH** auf den Strato-Server synchronisiert
 
-Dies erstellt alle statischen Dateien im `dist/` Verzeichnis.
-
-### Schritt 2: Dateien hochladen
-
-1. Verbinden Sie sich via FTP/SFTP mit Ihrem Strato-Server:
-   - Host: Ihre Strato FTP-Adresse (z.B. `ftp.strato.de` oder `ssh.strato.de`)
-   - Benutzername: Ihr Strato FTP-Benutzername
-   - Passwort: Ihr Strato FTP-Passwort
-
-2. Navigieren Sie zum Web-Root-Verzeichnis (üblicherweise `/` oder `/html` oder `/public_html`)
-
-3. Laden Sie **alle Dateien und Ordner** aus dem `dist/` Verzeichnis hoch
-
-### Schritt 3: Domain konfigurieren
-
-1. Loggen Sie sich in Ihr Strato-Kundencenter ein
-2. Navigieren Sie zu "Domains & SSL"
-3. Stellen Sie sicher, dass `lars-gentsch.de` auf das richtige Verzeichnis zeigt
-
-### Alternative: GitHub Actions für automatisches Deployment
-
-Sie können auch GitHub Actions für automatisches Deployment einrichten:
-
-1. FTP-Zugangsdaten als GitHub Secrets hinzufügen:
-   - `FTP_HOST`
-   - `FTP_USERNAME`
-   - `FTP_PASSWORD`
-
-2. Workflow-Datei erstellen (`.github/workflows/deploy.yml`):
-
-```yaml
-name: Deploy to Strato
-
-on:
-  push:
-    branches: [ main ]
-
-jobs:
-  deploy:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: '18'
-
-      - name: Install dependencies
-        run: npm ci
-
-      - name: Build
-        run: npm run build
-
-      - name: Deploy via FTP
-        uses: SamKirkland/FTP-Deploy-Action@v4.3.4
-        with:
-          server: ${{ secrets.FTP_HOST }}
-          username: ${{ secrets.FTP_USERNAME }}
-          password: ${{ secrets.FTP_PASSWORD }}
-          local-dir: ./dist/
-```
+Benötigte GitHub Secrets:
+- `FTP_HOST` — SSH-Host des Strato-Servers
+- `FTP_USERNAME` — SSH-Benutzername
+- `FTP_PASSWORD` — SSH-Passwort
 
 ## Projektstruktur
 
 ```
 /
-├── public/             # Statische Assets (favicon, etc.)
+├── public/                 # Statische Assets (favicon, Bilder)
+│   └── blog/               # Blog-Artikel-Bilder (je Slug ein Ordner)
 ├── src/
-│   ├── pages/         # Seiten (index.astro)
-│   └── styles/        # CSS-Dateien
-├── astro.config.mjs   # Astro-Konfiguration
-└── package.json       # Projekt-Dependencies
+│   ├── content/
+│   │   └── blog/
+│   │       ├── de/         # Deutsche Artikel (.md)
+│   │       └── en/         # Englische Artikel (.md)
+│   ├── layouts/            # Astro-Layouts
+│   ├── pages/              # Seiten (index.astro, Blog-Routen)
+│   └── styles/             # CSS-Dateien
+├── scripts/                # Node-Skripte (Blog-Pipeline)
+├── linkedin-posts/         # LinkedIn-Post-Entwürfe
+├── docs/                   # Dokumentation & Schreibstil-Guide
+├── .github/workflows/      # GitHub Actions (deploy, LinkedIn)
+├── astro.config.mjs
+└── package.json
 ```
 
 ## Inhalt aktualisieren
 
-Die Hauptseite befindet sich in `src/pages/index.astro`. Hier können Sie folgende Sektionen anpassen:
+Blog-Artikel liegen als Markdown-Dateien in `src/content/blog/de/` und `src/content/blog/en/`. Neue Artikel werden über die Artikel-Pipeline erstellt (siehe `docs/`).
 
-- **Hero Section** - Name und Titel
-- **About Section** - Beruflicher Hintergrund
-- **Expertise Section** - Fachgebiete
-- **Reading List** - Lieblingsbücher
-- **Contact Section** - Kontaktlinks
+Die Hauptseite liegt in `src/pages/index.astro`.
 
 ## Links
 
@@ -144,4 +92,4 @@ Die Hauptseite befindet sich in `src/pages/index.astro`. Hier können Sie folgen
 
 ## Lizenz
 
-© 2025 Lars Gentsch. Alle Rechte vorbehalten.
+© 2026 Lars Gentsch. Alle Rechte vorbehalten.
